@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Smart Temperature Converter</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        transition: background 0.8s ease; /* smooth background change */
+        background: #2a7b9b;
+        background: linear-gradient(
+          90deg,
+          rgba(42, 123, 155, 1) 0%,
+          rgba(87, 199, 133, 1) 50%,
+          rgba(237, 221, 83, 1) 100%
+        );
+      }
+      .converter {
+        background: #ffffffcc; /* semi-transparent */
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        width: 350px;
+      }
+      #tempInput {
+        width: 93%;
+      }
+      h2 {
+        color: #00796b;
+        margin-bottom: 15px;
+      }
+      h2 i {
+        color: #ff5722;
+        margin-right: 8px;
+      }
+      #toUnit {
+        margin-left: 18px;
+      }
+      input,
+      select,
+      button {
+        margin: 10px 0;
+        padding: 10px;
+        width: 85%;
+        border: 1px solid #b2dfdb;
+        border-radius: 6px;
+        font-size: 14px;
+      }
+      button {
+        background: #00796b;
+        color: #ffffff;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.3s;
+      }
+      button:hover {
+        background: #004d40;
+      }
+      .btn-clear {
+        background: #d32f2f;
+      }
+      .btn-clear:hover {
+        background: #b71c1c;
+      }
+      #result,
+      #condition,
+      #message {
+        margin-top: 12px;
+        font-weight: bold;
+        opacity: 0;
+        transform: translateY(10px);
+        transition: opacity 0.6s ease, transform 0.6s ease;
+      }
+      #result.show,
+      #condition.show,
+      #message.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      #condition i {
+        margin-right: 6px;
+        font-size: 18px;
+      }
+      #message {
+        font-size: 14px;
+        color: #333;
+        font-style: italic;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="converter">
+      <h2><i class="fa-solid fa-temperature-half"></i>Temperature Converter</h2>
+      <input type="text" id="tempInput" placeholder="Enter a Temperature" />
+      <span>From:</span>
+      <select id="fromUnit">
+        <option value="C" style="background: #e3f2fd; color: #0d47a1">
+          Celsius (°C)
+        </option>
+        <option value="F" style="background: #ffe0b2; color: #e65100">
+          Fahrenheit (°F)
+        </option>
+        <option value="K" style="background: #e8f5e9; color: #1b5e20">
+          Kelvin (K)
+        </option>
+      </select>
+      <span>To:</span>
+      <select id="toUnit">
+        <option value="C" style="background: #e3f2fd; color: #0d47a1">
+          Celsius (°C)
+        </option>
+        <option value="F" style="background: #ffe0b2; color: #e65100">
+          Fahrenheit (°F)
+        </option>
+        <option value="K" style="background: #e8f5e9; color: #1b5e20">
+          Kelvin (K)
+        </option>
+      </select>
+
+      <br />
+      <button onclick="convertTemp()">Convert</button>
+      <button class="btn-clear" onclick="clearFields()">Clear</button>
+      <p id="result"></p>
+      <p id="condition"></p>
+      <p id="message"></p>
+    </div>
+
+    <script>
+      function convertTemp() {
+        let temp = parseFloat(document.getElementById("tempInput").value);
+        let from = document.getElementById("fromUnit").value;
+        let to = document.getElementById("toUnit").value;
+        let result;
+
+        let resultEl = document.getElementById("result");
+        let conditionEl = document.getElementById("condition");
+        let messageEl = document.getElementById("message");
+
+        if (isNaN(temp)) {
+          resultEl.innerText = "Please enter a valid number!";
+          resultEl.classList.add("show");
+          conditionEl.innerText = "";
+          messageEl.innerText = "";
+          return;
+        }
+
+        // Conversion
+        if (from === to) {
+          result = temp;
+        } else if (from === "C" && to === "F") {
+          result = (temp * 9) / 5 + 32;
+        } else if (from === "C" && to === "K") {
+          result = temp + 273.15;
+        } else if (from === "F" && to === "C") {
+          result = ((temp - 32) * 5) / 9;
+        } else if (from === "F" && to === "K") {
+          result = ((temp - 32) * 5) / 9 + 273.15;
+        } else if (from === "K" && to === "C") {
+          result = temp - 273.15;
+        } else if (from === "K" && to === "F") {
+          result = ((temp - 273.15) * 9) / 5 + 32;
+        }
+
+        resultEl.innerText = ` Converted: ${result.toFixed(2)} °${to}`;
+        resultEl.classList.add("show");
+
+        // Celsius for condition
+        let celsiusValue;
+        if (to === "C") celsiusValue = result;
+        else if (to === "F") celsiusValue = ((result - 32) * 5) / 9;
+        else if (to === "K") celsiusValue = result - 273.15;
+
+        // Set condition + background + message
+        let condition = "",
+          message = "",
+          bg = "#e0f7fa";
+        if (celsiusValue <= -100) {
+          condition = `<i class="fa-solid fa-icicles" style="color:#0288d1"></i> Extreme Cold (near space)`;
+          message = "Too cold to survive!";
+          bg = "#1a237e";
+        } else if (celsiusValue <= 0) {
+          condition = `<i class="fa-solid fa-snowflake" style="color:#03a9f4"></i> Freezing Cold`;
+          message = "Wear a jacket!";
+          bg = "#2196f3";
+        } else if (celsiusValue <= 15) {
+          condition = `<i class="fa-solid fa-temperature-low" style="color:#03a9f4"></i> Cold Weather`;
+          message = "Grab a coffee!";
+          bg = "#64b5f6";
+        } else if (celsiusValue <= 25) {
+          condition = `<i class="fa-solid fa-house" style="color:#4caf50"></i> Room Temperature`;
+          message = "Perfect day for a walk!";
+          bg = "#a5d6a7";
+        } else if (celsiusValue <= 37) {
+          condition = `<i class="fa-solid fa-face-smile" style="color:#009688"></i> Normal / Warm`;
+          message = "Enjoy the nice weather!";
+          bg = "#80cbc4";
+        } else if (celsiusValue <= 40) {
+          condition = `<i class="fa-solid fa-head-side-cough" style="color:#ff9800"></i> High Fever`;
+          message = "Take care, drink water!";
+          bg = "#ffcc80";
+        } else if (celsiusValue <= 100) {
+          condition = `<i class="fa-solid fa-fire" style="color:#f44336"></i> Hot (like Desert/Boiling)`;
+          message = "Stay hydrated!";
+          bg = "#ef9a9a";
+        } else {
+          condition = `<i class="fa-solid fa-sun" style="color:#e65100"></i> Very Hot (Oven/Sun level)`;
+          message = "Too hot! Stay indoors!";
+          bg = "#ff7043";
+        }
+
+        conditionEl.innerHTML = `Condition: ${condition}`;
+        conditionEl.classList.add("show");
+        messageEl.innerText = message;
+        messageEl.classList.add("show");
+
+        // Change background dynamically
+        document.body.style.background = bg;
+      }
+
+      // Clear function
+      function clearFields() {
+        document.getElementById("tempInput").value = "";
+        document.getElementById("result").innerText = "";
+        document.getElementById("condition").innerText = "";
+        document.getElementById("message").innerText = "";
+        document.body.style.background =
+          "linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%)"; // reset bg
+      }
+    </script>
+  </body>
+</html>
